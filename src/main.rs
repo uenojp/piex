@@ -2,6 +2,7 @@ use std::ffi::CString;
 use std::fs::Permissions;
 use std::io;
 use std::os::unix::prelude::{AsRawFd, PermissionsExt};
+use std::process;
 
 use nix::sys::wait::{waitpid, WaitPidFlag, WaitStatus};
 use nix::unistd::{close, execvp, fork, ForkResult};
@@ -50,11 +51,11 @@ fn run() -> Result<i32, Box<dyn std::error::Error>> {
 fn main() {
     match run() {
         Ok(code) => {
-            std::process::exit(code);
+            process::exit(code);
         }
         Err(err) => {
             eprintln!("{}", err);
-            std::process::exit(1);
+            process::exit(1);
         }
     }
 }
