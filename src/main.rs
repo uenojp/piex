@@ -7,7 +7,7 @@ use nix::sys::wait::{waitpid, WaitPidFlag, WaitStatus};
 use nix::unistd::{close, execvp, fork, ForkResult};
 use tempfile::NamedTempFile;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn run() -> Result<i32, Box<dyn std::error::Error>> {
     let mut tmpfile = NamedTempFile::new()?;
     io::copy(&mut io::stdin().lock(), &mut tmpfile.as_file_mut())?;
     tmpfile
@@ -30,7 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
                 _ => 127,
             };
-            std::process::exit(code);
+            return Ok(code);
         }
         ForkResult::Child => {
             let path = match tmpfile.path().to_str() {
@@ -44,5 +44,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             execvp(&args[0], &args)?;
         }
     }
-    Ok(())
+    Ok(1)
+}
+
+fn main() {
+    match run() {
+        Ok(code) => {
+            std::process::exit(code);
+        }
+        Err(err) => {
+            eprintln!("{}", err);
+            std::process::exit(1);
+        }
+    }
 }
